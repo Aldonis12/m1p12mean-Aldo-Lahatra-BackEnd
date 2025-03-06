@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const roleRoutes = require('./src/routes/roles');
+const userRoutes = require('./src/routes/users');
 const roleAuth = require('./src/routes/auth');
 
 dotenv.config();
@@ -16,6 +18,8 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error(err));
   
 app.use('/login', roleAuth);
+app.use('/roles', roleRoutes);
+app.use('/users', userRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
