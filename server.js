@@ -6,6 +6,7 @@ const roleRoutes = require('./src/routes/roles');
 const userRoutes = require('./src/routes/users');
 const roleAuth = require('./src/routes/auth');
 const typeVehiculeRoutes = require('./src/routes/typevehicule');
+const vehiculeRoutes = require('./src/routes/vehicules');
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.use('/login', roleAuth);
 app.use('/roles', roleRoutes);
 app.use('/users', userRoutes);
 app.use('/typevehicule', typeVehiculeRoutes);
+app.use('/vehicules', vehiculeRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
