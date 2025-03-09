@@ -17,6 +17,7 @@ mongoose.connect(process.env.MONGO_URI, {
   
 app.use('/login', roleAuth);
 app.use('/prestations', require('./src/routes/prestationRoute'))
+app.use('/avis', require('./src/routes/avisRoute'))
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
