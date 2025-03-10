@@ -16,11 +16,21 @@ const addRendezVous = async (req, res) => {
             throw new Error('Prestation not found');
         }
 
+        if (!data.date || !data.heure) {
+            throw new Error('Date and time are required');
+        }
+
+        const fullDateTimeString = `${data.date}T${data.heure}:00.000Z`;
+        const dateRdv = new Date(fullDateTimeString);
+
+        if (isNaN(dateRdv.getTime())) {
+            throw new Error('Invalid date or time format');
+        }
+
         const rdvData = {
-            type: data.type,
             client: client._id,
             prestation: prestation._id,
-            date: data.date,
+            date_rdv: dateRdv,
         };
 
         const rdv = new RendezVous(rdvData);
@@ -32,6 +42,7 @@ const addRendezVous = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 const addMecanicienRdv = async (req, res) => {
     try{
@@ -47,6 +58,7 @@ const addMecanicienRdv = async (req, res) => {
             throw new Error('RendezVous not found');
         }
         rdv.mecanicien = data.mecanicienId;
+        rdv.type = true;
         await rdv.save();
 
         res.status(200).json(rdv);
@@ -66,7 +78,7 @@ const cancelRendezVous = async (req, res) => {
         }
 
         rdv.date_annulation = new Date();
-
+        rdv.type = false;
         await rdv.save();
 
         res.status(200).json(rdv);

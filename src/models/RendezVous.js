@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const RendezVousSchema = new mongoose.Schema({
-    type: {type: String, required: true},
+    type: {type: Boolean, default:0},
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -16,6 +16,7 @@ const RendezVousSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    date_rdv : {type: Date, required: true},
     date_annulation : {type: Date, required: false},
 }, {timestamps: true});
 
