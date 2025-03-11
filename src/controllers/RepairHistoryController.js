@@ -15,6 +15,19 @@ const getAllRepairHistory = async (req,res) => {
     }
 }
 
+const getRepairHistoryForMecanicien = async (req,res) => {
+    try{
+        const repairHistory = await RepairHistory.find({mecanicien: req.params.mecanicienId})
+        .populate('mecanicien')
+        .populate('prestation')
+        .populate('client').exec();
+        
+        res.json(repairHistory);
+    } catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
 const addHistory = async (req,res) => {
     try{
         const data = req.body;
@@ -52,5 +65,5 @@ const addHistory = async (req,res) => {
 }
 
 module.exports = {
-    addHistory, getAllRepairHistory
+    addHistory, getAllRepairHistory, getRepairHistoryForMecanicien
 }

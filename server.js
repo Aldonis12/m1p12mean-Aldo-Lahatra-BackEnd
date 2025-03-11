@@ -19,6 +19,8 @@ app.use('/login', roleAuth);
 app.use('/prestations', require('./src/routes/prestationRoute'))
 app.use('/avis', require('./src/routes/avisRoute'))
 app.use('/repair-history', require('./src/routes/repairHistoryRoute'))
+app.use('/factures', require('./src/routes/factureRoute'))
+app.use('/dashboard', require('./src/routes/dashboardRoute'))
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
