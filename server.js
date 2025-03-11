@@ -26,6 +26,7 @@ app.use('/users', userRoutes);
 app.use('/typevehicule', typeVehiculeRoutes);
 app.use('/vehicules', vehiculeRoutes);
 app.use('/rendezvous', rendezvousRoutes);
+app.use('/repair-history', require('./src/routes/repairHistoryRoute'))
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));

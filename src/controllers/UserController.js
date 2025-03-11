@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const Role = require("../models/Role");
 const bcrypt = require("bcrypt");
+const RepairHistory = require("../models/RepairHistory");
+
 
 const createUser = async (req, res) => {
   try {
@@ -101,10 +103,27 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getLoyalUser = async (req, res) => {
+  try {
+      const loyalClients = await RepairHistory.aggregate([
+          { $group: { _id: "$client", count: { $sum: 1 } } },
+          { $match: { count: { $gt: 4 } } }
+      ]);
+
+      const clientIds = loyalClients.map(client => client._id);
+      const users = await User.find({ _id: { $in: clientIds } });
+      res.json(users);
+  } catch (error) {
+      res.status(500).json({ message: 'Erreur lors de la récupération des clients fidèles', error });
+  }
+};
+
+
 module.exports = {
     createUser,
     getUser,
     getUserById,
     updateUser,
     deleteUser,
+    getLoyalUser
   };
