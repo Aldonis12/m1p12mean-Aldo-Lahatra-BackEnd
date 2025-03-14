@@ -37,8 +37,18 @@ const addPrestation = async (req,res) => {
 }
 
 const getAllPrestation = async(req,res) =>   {
+
     try{
-        const prestations = await Prestation.find();
+        let prestations = await Prestation.find();
+        if(req.query.search){
+            const searchTerm = req.query.search;
+           
+            // Search term is not a number, so perform string search
+            prestations = await Prestation.find({
+                name: { $regex: searchTerm, $options: 'i' }, //Case insensitive name search
+            }).exec();       
+        }
+
         res.json(prestations);
     } catch(error){
         res.status(500).json({message: error.message});
