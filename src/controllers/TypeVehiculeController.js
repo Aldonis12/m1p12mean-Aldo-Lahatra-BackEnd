@@ -19,4 +19,17 @@ const getTypeVehicule = async (req, res) => {
     }
 };
 
-module.exports = { createTypeVehicule, getTypeVehicule };
+const deleteUser = async (req, res) => {
+    try {
+      const user = await TypeVehicule.findByIdAndDelete(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "TypeVehicule non trouvé" });
+      }
+  
+      res.status(200).json({ message: "TypeVehicule supprimé avec succès" });
+    } catch (error) {
+      res.status(500).json({ message: "Erreur lors de la suppression du TypeVehicule" });
+    }
+  };
+
+module.exports = { createTypeVehicule, getTypeVehicule, deleteUser };
