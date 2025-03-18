@@ -4,7 +4,6 @@ const Role = require("../models/Role");
 const bcrypt = require("bcrypt");
 const RepairHistory = require("../models/RepairHistory");
 
-
 const createUser = async (req, res) => {
   try {
     const { name, surname, mail, pswd, roleId } = req.body;
@@ -35,31 +34,56 @@ const createUser = async (req, res) => {
 
     await newUser.save();
 
-    res.status(200).json({message: "Connexion réussie",newUser});
+    res.status(200).json({ message: "Connexion réussie", newUser });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
 
 const getUser = async (req, res) => {
-    try {
-        const users = await User.find().populate('role');
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: 'Erreur lors de la récupération des utilisateurs' });
-    }
+  try {
+    const users = await User.find().populate("role");
+    res.json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des utilisateurs" });
+  }
 };
 
 const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).populate('role');
-        if (!user) {
-            return res.status(404).json({ message: 'Utilisateur non trouvé' });
-        }
-        res.json(user);
-    } catch (error) {
-        res.status(500).json({ message: 'Erreur lors de la récupération de l\'utilisateur' });
+  try {
+    const user = await User.findById(req.params.id).populate("role");
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
+    res.json(user);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération de l'utilisateur" });
+  }
+};
+
+const getUserByRole = async (req, res) => {
+  try {
+    const { roleName } = req.params;
+    if (!roleName) {
+      return res.status(400).json({ message: "Le nom du rôle est requis" });
+    }
+    const role = await Role.findOne({ name: roleName });
+
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+    const users = await User.find({ role: role._id }).populate("role");
+
+    res.json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des utilisateurs" });
+  }
 };
 
 const updateUser = async (req, res) => {
@@ -84,9 +108,13 @@ const updateUser = async (req, res) => {
     user.role = roleId || user.role;
 
     await user.save();
-    res.status(200).json({ message: "Utilisateur mis à jour avec succès", user });
+    res
+      .status(200)
+      .json({ message: "Utilisateur mis à jour avec succès", user });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la mise à jour de l'utilisateur" });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la mise à jour de l'utilisateur" });
   }
 };
 
@@ -99,31 +127,36 @@ const deleteUser = async (req, res) => {
 
     res.status(200).json({ message: "Utilisateur supprimé avec succès" });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la suppression de l'utilisateur" });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la suppression de l'utilisateur" });
   }
 };
 
 const getLoyalUser = async (req, res) => {
   try {
-      const loyalClients = await RepairHistory.aggregate([
-          { $group: { _id: "$client", count: { $sum: 1 } } },
-          { $match: { count: { $gt: 4 } } }
-      ]);
+    const loyalClients = await RepairHistory.aggregate([
+      { $group: { _id: "$client", count: { $sum: 1 } } },
+      { $match: { count: { $gt: 4 } } },
+    ]);
 
-      const clientIds = loyalClients.map(client => client._id);
-      const users = await User.find({ _id: { $in: clientIds } });
-      res.json(users);
+    const clientIds = loyalClients.map((client) => client._id);
+    const users = await User.find({ _id: { $in: clientIds } });
+    res.json(users);
   } catch (error) {
-      res.status(500).json({ message: 'Erreur lors de la récupération des clients fidèles', error });
+    res.status(500).json({
+      message: "Erreur lors de la récupération des clients fidèles",
+      error,
+    });
   }
 };
 
-
 module.exports = {
-    createUser,
-    getUser,
-    getUserById,
-    updateUser,
-    deleteUser,
-    getLoyalUser
-  };
+  createUser,
+  getUser,
+  getUserById,
+  updateUser,
+  deleteUser,
+  getLoyalUser,
+  getUserByRole
+};
