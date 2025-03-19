@@ -1,5 +1,6 @@
 const Prestation = require("../models/Prestation");
 const RendezVous = require("../models/RendezVous");
+const mongoose = require("mongoose");
 const User = require("../models/User");
 
 const addRendezVous = async (req, res) => {
@@ -71,7 +72,6 @@ const addMecanicienRdv = async (req, res) => {
 
 const cancelRendezVous = async (req, res) => {
     try {
-
         const rdv = await RendezVous.findById(req.params.id);
         if (!rdv) {
             throw new Error('RendezVous not found');
@@ -89,7 +89,7 @@ const cancelRendezVous = async (req, res) => {
 
 const getAllRendezVous = async (req, res) => {
     try {
-        const rdvs = await RendezVous.find();
+        const rdvs = await RendezVous.find().populate("prestation").populate("mecanicien").populate("client");
 
         if (!rdvs || rdvs.length === 0) {
             return res.status(404).json({ message: 'No RDV found' });
@@ -101,9 +101,27 @@ const getAllRendezVous = async (req, res) => {
     }
 };
 
+const getRendezVousUser = async (req, res) => {
+    try {
+
+        const userId = req.params.userId;
+        
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Utilisateur invalide" });
+        }
+
+        const rdvs = await RendezVous.find({ client: userId }).populate("prestation").populate("mecanicien");
+
+        res.json(rdvs);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 module.exports = {
     addRendezVous,
     cancelRendezVous,
     getAllRendezVous,
-    addMecanicienRdv
+    addMecanicienRdv,
+    getRendezVousUser
 }
