@@ -28,7 +28,7 @@ app.use('/vehicules', vehiculeRoutes);
 app.use('/rendezvous', rendezvousRoutes);
 app.use('/prestations', require('./src/routes/prestationRoute'))
 app.use('/avis', require('./src/routes/avisRoute'))
-app.use('/repair-history', require('./src/routes/repairHistoryRoute'))
+app.use('/repair-histories', require('./src/routes/repairHistoryRoute'))
 app.use('/factures', require('./src/routes/factureRoute'))
 app.use('/dashboard', require('./src/routes/dashboardRoute'))
 
