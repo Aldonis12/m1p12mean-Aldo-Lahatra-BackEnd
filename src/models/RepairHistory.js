@@ -15,6 +15,11 @@ const RepairHistorySchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    vehicule: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicule',
+        required: true
+    },
     mecanicien: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
