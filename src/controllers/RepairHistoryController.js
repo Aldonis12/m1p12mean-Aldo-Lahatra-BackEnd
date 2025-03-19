@@ -15,6 +15,25 @@ const getAllRepairHistory = async (req,res) => {
     }
 }
 
+//Function GetPrice -> 10%
+async function PriceLoyalUser(clientId, prestationId) {
+    try {
+        const repairHistoryCount = await RepairHistory.countDocuments({ client: clientId });
+
+        const prestation = await Prestation.findById(prestationId);
+        if (!prestation) {
+            throw new Error("Prestation not found");
+        }
+
+        const price = repairHistoryCount > 4 ? prestation.price * 0.9 : prestation.price; //10% amle prix prestation
+        return price;
+    } catch (error) {
+        console.error("Erreur :", error.message);
+        return null;
+    }
+}
+//------------------------//
+
 const getRepairHistoryForMecanicien = async (req,res) => {
     try{
         const repairHistory = await RepairHistory.find({mecanicien: req.params.mecanicienId})
