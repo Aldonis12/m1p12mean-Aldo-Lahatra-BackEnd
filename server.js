@@ -26,6 +26,8 @@ app.use('/users', userRoutes);
 app.use('/typevehicule', typeVehiculeRoutes);
 app.use('/vehicules', vehiculeRoutes);
 app.use('/rendezvous', rendezvousRoutes);
+app.use('/prestations', require('./src/routes/prestationRoute'))
+app.use('/avis', require('./src/routes/avisRoute'))
 app.use('/repair-history', require('./src/routes/repairHistoryRoute'))
 
 const PORT = 5000;
