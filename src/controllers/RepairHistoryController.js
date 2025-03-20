@@ -1,12 +1,14 @@
 const Prestation = require("../models/Prestation");
 const User = require("../models/User");
 const RepairHistory = require("../models/RepairHistory");
+const Vehicule = require("../models/Vehicule");
 
 const getAllRepairHistory = async (req,res) => {
     try{
         let repairHistory = await RepairHistory.find()
         .populate('mecanicien')
         .populate('prestation')
+        .populate('vehicule')
         .populate({ 
             path: 'client',
              
@@ -133,6 +135,18 @@ const generateInvoiceNumber = () => {
     return `INV-${year}${month}${day}-${randomString}`;
 }
 
+const generateRandomString = (length) => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+  
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+  
+    return result;
+}
+
 const addHistory = async (req,res) => {
     try{
         const data = req.body;
@@ -154,11 +168,18 @@ const addHistory = async (req,res) => {
             
             throw new Error('Prestation not found');
         }
+        
+        const vehicule = await Vehicule.findById({_id: data.vehiculeId});
+        if(!vehicule){
+            
+            throw new Error('Vehicule not found');
+        }
 
         const history = new RepairHistory({
             prestation: prestation._id,
             mecanicien: mecanicien._id,
             client: client._id,
+            vehicule: vehicule._id,
             numFacture: generateInvoiceNumber()
         });
         
