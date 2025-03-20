@@ -8,17 +8,25 @@ const createUser = async (req, res) => {
   try {
     const { name, surname, mail, pswd, roleId } = req.body;
 
-    if (!name || !surname || !mail || !pswd || !roleId) {
+    if (!name || !surname || !mail || !pswd) {
       return res.status(400).json({ message: "Tous les champs sont requis" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(roleId)) {
-      return res.status(400).json({ message: "ID du rôle invalide" });
-    }
+    let role = null;
 
-    const role = await Role.findOne({ _id: roleId });
-    if (!role) {
-      return res.status(404).json({ message: "Rôle introuvable" });
+    if (roleId) {
+      if (!mongoose.Types.ObjectId.isValid(roleId)) {
+        return res.status(400).json({ message: "ID du rôle invalide" });
+      }
+      role = await Role.findOne({ _id: roleId });
+      if (!role) {
+        return res.status(404).json({ message: "Rôle introuvable" });
+      }
+    } else {
+      role = await Role.findOne({ name: "Client" });
+      if (!role) {
+        return res.status(404).json({ message: "Rôle 'Client' introuvable" });
+      }
     }
 
     const saltRounds = 10;
@@ -29,12 +37,12 @@ const createUser = async (req, res) => {
       surname,
       mail,
       pswd: hashedPassword,
-      role: roleId,
+      role: role._id,
     });
 
     await newUser.save();
 
-    res.status(200).json({ message: "Connexion réussie", newUser });
+    res.status(200).json({ message: "Utilisateur créé avec succès", newUser });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
