@@ -87,6 +87,22 @@ const cancelRendezVous = async (req, res) => {
     }
 };
 
+const validateRendezVous = async (req, res) => {
+    try {
+        const rdv = await RendezVous.findById(req.params.id);
+        if (!rdv) {
+            throw new Error('RendezVous not found');
+        }
+
+        rdv.type = true;
+        await rdv.save();
+
+        res.status(200).json(rdv);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 const getAllRendezVous = async (req, res) => {
     try {
         const rdvs = await RendezVous.find().populate("prestation").populate("mecanicien").populate("client");
@@ -123,5 +139,6 @@ module.exports = {
     cancelRendezVous,
     getAllRendezVous,
     addMecanicienRdv,
-    getRendezVousUser
+    getRendezVousUser,
+    validateRendezVous
 }
