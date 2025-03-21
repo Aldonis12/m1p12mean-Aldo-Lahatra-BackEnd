@@ -15,9 +15,9 @@ router.get('/:id', findPrestation)
 
 
 //Mettre à jour un article
-router.put('/:id', updatePrestation)
+router.put('/:id', authGuard, roleGuard(['Manager']), updatePrestation)
 
 //Supprimer un article
-router.delete('/:id', deletePrestation)
+router.delete('/:id', authGuard, roleGuard(['Manager']), deletePrestation)
 
 module.exports = router;

@@ -2,9 +2,9 @@ const jwt = require("jsonwebtoken");
 
 // Middleware function to authenticate requests
 const authGuard = (req, res, next) =>  {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-  
+    
     if (token == null) return res.sendStatus(401); // No token, unauthorized
   
     jwt.verify(token, 'SECRET_KEY', (err, user) => {
