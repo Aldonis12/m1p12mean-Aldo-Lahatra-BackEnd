@@ -159,6 +159,34 @@ const getLoyalUser = async (req, res) => {
   }
 };
 
+const getMecanicienDispo = async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    const selectedDate = date ? new Date(date) : new Date();
+    const formattedDate = selectedDate.toISOString().split('T')[0];
+    
+    const role = await Role.findOne({ name: "Mecanicien" });
+    
+    const mecaniciens = await User.find({ role: role._id }).populate("role");
+    
+    const repairHistory = await RepairHistory.find({
+      createdAt: { 
+        $gte: new Date(formattedDate + "T00:00:00Z"),  // Début de la journée
+        $lt: new Date(formattedDate + "T23:59:59Z")  // Fin de la journée
+      }
+    });
+
+    const mecaniciensAvecRepairs = repairHistory.map(r => r.mecanicien._id.toString());
+    
+    const mecaniciensDispo = mecaniciens.filter(m => !mecaniciensAvecRepairs.includes(m._id.toString()));
+
+    res.status(200).json(mecaniciensDispo);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des mécaniciens : " + error });
+  }
+}
+
 module.exports = {
   createUser,
   getUser,
@@ -166,5 +194,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getLoyalUser,
-  getUserByRole
+  getUserByRole,
+  getMecanicienDispo
 };
