@@ -42,7 +42,7 @@ const getAllPrestation = async(req,res) =>   {
     const limit = parseInt(req.query.limit) || 10;
 
     const startIndex = (page - 1) * limit;
-    const total = await Prestation.countDocuments();
+    let total = await Prestation.countDocuments();
 
     try{
         let prestations = await Prestation.find().skip(startIndex).limit(limit);
@@ -52,7 +52,11 @@ const getAllPrestation = async(req,res) =>   {
             // Search term is not a number, so perform string search
             prestations = await Prestation.find({
                 name: { $regex: searchTerm, $options: 'i' }, //Case insensitive name search
-            }).exec().skip(startIndex).limit(limit);       
+            }).skip(startIndex).limit(limit).exec(); 
+            
+            total = await Prestation.countDocuments({
+                name: { $regex: searchTerm, $options: 'i' }, //Case insensitive name search
+            });
         }
 
         let sample = {
@@ -63,7 +67,7 @@ const getAllPrestation = async(req,res) =>   {
             data: prestations
         }
         
-        res.json(prestations);
+        res.json(sample);
     } catch(error){
         res.status(500).json({message: error.message});
     }
