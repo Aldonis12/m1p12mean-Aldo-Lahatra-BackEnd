@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     mail: { type: String, required: true, unique: true },
     pswd: { type: String, required: true },
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' }
-});
+}, {timestamps: true});
 
 const User = mongoose.model('User', userSchema);
 
