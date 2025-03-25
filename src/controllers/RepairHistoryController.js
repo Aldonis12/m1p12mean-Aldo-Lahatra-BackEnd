@@ -2,91 +2,99 @@ const Prestation = require("../models/Prestation");
 const User = require("../models/User");
 const RepairHistory = require("../models/RepairHistory");
 const Vehicule = require("../models/Vehicule");
+const mongoose = require('mongoose');
 
 const getAllRepairHistory = async (req,res) => {
     try{
-        let repairHistory = await RepairHistory.find()
-        .populate('mecanicien')
-        .populate('prestation')
-        .populate('vehicule')
-        .populate({ 
-            path: 'client',
-             
-         }).exec();
+        let pipeline = [
+            {
+                $lookup: {
+                    from: 'users', 
+                    localField: 'mecanicien',
+                    foreignField: '_id',
+                    as: 'mecanicien'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'prestations',
+                    localField: 'prestation',
+                    foreignField: '_id',
+                    as: 'prestation'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'vehicules', 
+                    localField: 'vehicule',
+                    foreignField: '_id',
+                    as: 'vehicule'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users', // Remplacez par le nom de la collection des clients
+                    localField: 'client',
+                    foreignField: '_id',
+                    as: 'client'
+                }
+            },
+            {
+                $lookup: {
+                  from: 'avis', 
+                  localField: '_id', 
+                  foreignField: 'repairHistory', 
+                  as: 'avis'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$mecanicien',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$vehicule',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$prestation',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$client',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$avis',
+                    preserveNullAndEmptyArrays: true
+                }
+            }];
 
         if(req.query.search){
             const searchTerm = req.query.search;
-            repairHistory = await RepairHistory.aggregate([
-                {
-                    $lookup: {
-                        from: 'users', 
-                        localField: 'mecanicien',
-                        foreignField: '_id',
-                        as: 'mecanicien'
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'prestations',
-                        localField: 'prestation',
-                        foreignField: '_id',
-                        as: 'prestation'
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'vehicules', 
-                        localField: 'vehicule',
-                        foreignField: '_id',
-                        as: 'vehicule'
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'users', // Remplacez par le nom de la collection des clients
-                        localField: 'client',
-                        foreignField: '_id',
-                        as: 'client'
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$mecanicien',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$vehicule',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$prestation',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$client',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $match: {
-                        $or: [
-                            { numFacture: { $regex: searchTerm, $options: 'i' } },
-                            { 'mecanicien.name': { $regex: searchTerm, $options: 'i' } },
-                            { 'prestation.name': { $regex: searchTerm, $options: 'i' } },
-                            { 'client.name': { $regex: searchTerm, $options: 'i' } },
-                            { 'vehicule.name': { $regex: searchTerm, $options: 'i' } }
-                        ]
-                    }
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { numFacture: { $regex: searchTerm, $options: 'i' } },
+                        { 'mecanicien.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'prestation.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'client.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'vehicule.name': { $regex: searchTerm, $options: 'i' } }
+                    ]
                 }
-            ]);
+            });
             
         }
+
+        let repairHistory = await RepairHistory.aggregate(pipeline);
         
         res.json(repairHistory);
     } catch(error){
@@ -115,10 +123,103 @@ async function PriceLoyalUser(clientId, prestationId) {
 
 const getRepairHistoryForMecanicien = async (req,res) => {
     try{
-        const repairHistory = await RepairHistory.find({mecanicien: req.params.mecanicienId})
-        .populate('mecanicien')
-        .populate('prestation')
-        .populate('client').exec();
+        const mecanicienId = req.params.mecanicienId;
+        let pipeline = [
+            {
+                $lookup: {
+                    from: 'users', 
+                    localField: 'mecanicien',
+                    foreignField: '_id',
+                    as: 'mecanicien'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'prestations',
+                    localField: 'prestation',
+                    foreignField: '_id',
+                    as: 'prestation'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'vehicules', 
+                    localField: 'vehicule',
+                    foreignField: '_id',
+                    as: 'vehicule'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users', // Remplacez par le nom de la collection des clients
+                    localField: 'client',
+                    foreignField: '_id',
+                    as: 'client'
+                }
+            },
+            {
+                $lookup: {
+                  from: 'avis', 
+                  localField: '_id', 
+                  foreignField: 'repairHistory', 
+                  as: 'avis'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$mecanicien',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$vehicule',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$prestation',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$client',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$avis',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $match: {
+                    'mecanicien.name': mecanicienId 
+                }
+            }
+        ];
+
+        if(req.query.search){
+            const searchTerm = req.query.search;
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { numFacture: { $regex: searchTerm, $options: 'i' } },
+                        { 'mecanicien.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'prestation.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'client.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'vehicule.name': { $regex: searchTerm, $options: 'i' } }
+                    ]
+                }
+            });
+            
+        }
+
+        let repairHistory = await RepairHistory.aggregate(pipeline);
+        
         
         res.json(repairHistory);
     } catch(error){
@@ -191,6 +292,93 @@ const addHistory = async (req,res) => {
     }
 }
 
+const findHistory = async (req,res) => {
+    try{
+        const objectId = new mongoose.Types.ObjectId(req.params.id);
+        // const objectId = req.params.id;
+        
+        const results = await RepairHistory.aggregate([
+        {
+            $lookup: {
+                from: 'users', 
+                localField: 'mecanicien',
+                foreignField: '_id',
+                as: 'mecanicien'
+            }
+        },
+        {
+            $lookup: {
+                from: 'prestations',
+                localField: 'prestation',
+                foreignField: '_id',
+                as: 'prestation'
+            }
+        },
+        {
+            $lookup: {
+                from: 'vehicules', 
+                localField: 'vehicule',
+                foreignField: '_id',
+                as: 'vehicule'
+            }
+        },
+        {
+            $lookup: {
+                from: 'users', // Remplacez par le nom de la collection des clients
+                localField: 'client',
+                foreignField: '_id',
+                as: 'client'
+            }
+        },
+        {
+            $lookup: {
+            from: 'avis', 
+            localField: '_id', 
+            foreignField: 'repairHistory', 
+            as: 'avis'
+            }
+        },
+        {
+            $unwind: {
+                path: '$mecanicien',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $unwind: {
+                path: '$vehicule',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $unwind: {
+                path: '$prestation',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $unwind: {
+                path: '$client',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $unwind: {
+                path: '$avis',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $match: {
+            _id: objectId
+            }
+        }]);
+        res.status(200).json(results)
+    } catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
 module.exports = {
-    addHistory, getAllRepairHistory, getRepairHistoryForMecanicien
+    addHistory, getAllRepairHistory, getRepairHistoryForMecanicien, findHistory
 }

@@ -59,6 +59,35 @@ const getUser = async (req, res) => {
   }
 };
 
+const getTeam = async (req, res) => {
+  try {
+    // get all users excpet client
+    const users = await User.aggregate([
+      {
+        $lookup: {
+          from: 'roles', 
+          localField: 'role',
+          foreignField: '_id',
+          as: 'role',
+        },
+      },
+      {
+        $unwind: '$role', 
+      },
+      {
+        $match: {
+          'role.name': { $ne: 'Client' },
+        },
+      },]);
+
+    res.json(users);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des utilisateurs" });
+  }
+};
+
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate("role");
@@ -166,5 +195,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getLoyalUser,
-  getUserByRole
+  getUserByRole,
+  getTeam
 };

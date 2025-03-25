@@ -13,6 +13,11 @@ const AvisSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    repairHistory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RepairHistory',
+        required: true
+    }
 }, {timestamps: true});
 
 module.exports = mongoose.model('Avis', AvisSchema);

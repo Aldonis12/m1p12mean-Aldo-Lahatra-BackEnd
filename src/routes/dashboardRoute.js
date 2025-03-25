@@ -2,6 +2,6 @@ const express = require('express');
 const { mecanicienPerformance } = require('../controllers/DashboardController');
 const router = express.Router();
 
-router.get('/mecanicien-perfomance', mecanicienPerformance);
+router.get('/mecanicien-performance', mecanicienPerformance);
 
 module.exports = router;
