@@ -37,8 +37,32 @@ const addPrestation = async (req,res) => {
 }
 
 const getAllPrestation = async(req,res) =>   {
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    const total = await Prestation.countDocuments();
+
     try{
-        const prestations = await Prestation.find();
+        let prestations = await Prestation.find().skip(startIndex).limit(limit);
+        if(req.query.search){
+            const searchTerm = req.query.search;
+           
+            // Search term is not a number, so perform string search
+            prestations = await Prestation.find({
+                name: { $regex: searchTerm, $options: 'i' }, //Case insensitive name search
+            }).exec().skip(startIndex).limit(limit);       
+        }
+
+        let sample = {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            data: prestations
+        }
+        
         res.json(prestations);
     } catch(error){
         res.status(500).json({message: error.message});

@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const RepairHistorySchema = new mongoose.Schema({
+    numFacture: {
+        type: String,
+        required: true
+    },
     prestation: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Prestation',
@@ -9,6 +13,11 @@ const RepairHistorySchema = new mongoose.Schema({
     client: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        required: true
+    },
+    vehicule: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicule',
         required: true
     },
     mecanicien: {
