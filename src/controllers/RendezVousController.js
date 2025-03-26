@@ -134,11 +134,27 @@ const getRendezVousUser = async (req, res) => {
     }
 };
 
+const deleteRdv = async (req, res) => {
+  try {
+    const Rdv = await RendezVous.findByIdAndDelete(req.params.id);
+    if (!Rdv) {
+      return res.status(404).json({ message: "rendez-vous non trouvé" });
+    }
+
+    res.status(200).json({ message: "rendez-vous supprimé avec succès" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la suppression du rendez-vous" });
+  }
+};
+
 module.exports = {
     addRendezVous,
     cancelRendezVous,
     getAllRendezVous,
     addMecanicienRdv,
     getRendezVousUser,
-    validateRendezVous
+    validateRendezVous,
+    deleteRdv
 }
