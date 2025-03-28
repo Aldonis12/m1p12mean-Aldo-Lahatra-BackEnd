@@ -123,7 +123,7 @@ async function PriceLoyalUser(clientId, prestationId) {
 
 const getRepairHistoryForMecanicien = async (req,res) => {
     try{
-        const mecanicienId = req.params.mecanicienId;
+        const mecanicienId = new mongoose.Types.ObjectId(req.params.mecanicienId);
         let pipeline = [
             {
                 $lookup: {
@@ -197,7 +197,113 @@ const getRepairHistoryForMecanicien = async (req,res) => {
             },
             {
                 $match: {
-                    'mecanicien.name': mecanicienId 
+                    'mecanicien._id': mecanicienId 
+                }
+            }
+        ];
+
+        if(req.query.search){
+            const searchTerm = req.query.search;
+            pipeline.push({
+                $match: {
+                    $or: [
+                        { numFacture: { $regex: searchTerm, $options: 'i' } },
+                        { 'mecanicien.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'prestation.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'client.name': { $regex: searchTerm, $options: 'i' } },
+                        { 'vehicule.name': { $regex: searchTerm, $options: 'i' } }
+                    ]
+                }
+            });
+            
+        }
+
+        let repairHistory = await RepairHistory.aggregate(pipeline);
+        
+        
+        res.json(repairHistory);
+    } catch(error){
+        res.status(500).json({message: error.message});
+    }
+}
+
+const getRepairHistoryForClient = async (req,res) => {
+    try{
+        const clientId = new mongoose.Types.ObjectId(req.params.clientId);
+        let pipeline = [
+            {
+                $lookup: {
+                    from: 'users', 
+                    localField: 'mecanicien',
+                    foreignField: '_id',
+                    as: 'mecanicien'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'prestations',
+                    localField: 'prestation',
+                    foreignField: '_id',
+                    as: 'prestation'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'vehicules', 
+                    localField: 'vehicule',
+                    foreignField: '_id',
+                    as: 'vehicule'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users', // Remplacez par le nom de la collection des clients
+                    localField: 'client',
+                    foreignField: '_id',
+                    as: 'client'
+                }
+            },
+            {
+                $lookup: {
+                  from: 'avis', 
+                  localField: '_id', 
+                  foreignField: 'repairHistory', 
+                  as: 'avis'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$mecanicien',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$vehicule',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$prestation',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$client',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$avis',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $match: {
+                    'client._id': clientId 
                 }
             }
         ];
@@ -380,5 +486,5 @@ const findHistory = async (req,res) => {
 }
 
 module.exports = {
-    addHistory, getAllRepairHistory, getRepairHistoryForMecanicien, findHistory
+    addHistory, getAllRepairHistory, getRepairHistoryForMecanicien, findHistory, getRepairHistoryForClient
 }

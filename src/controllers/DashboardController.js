@@ -1,6 +1,7 @@
 const Avis = require("../models/Avis");
 const User = require("../models/User");
 const RepairHistory = require("../models/RepairHistory");
+const Role = require("../models/Role");
 
 const totalIncome = async (req, res) => {
     try{
@@ -168,18 +169,66 @@ const totalIncomeByMonthThisYear = async (req, res) => {
 
 const mecanicienPerformance = async (req, res) => {
     try{
+
+        const mecanicienRole = await Role.findOne({name: 'Mecanicien'});
+
+
+        if (!mecanicienRole) {
+            // Handle the case where the "Mecanicien" role is not found
+            return []; // Or throw an error, or handle as needed
+        }
+
         const mecanicien = await User.aggregate([
             {
+                $match: {
+                    'role': mecanicienRole._id
+                }
+            },
+            {
                 $lookup: {
-                    from: 'avis', // Assuming your User collection is named 'users'
+                    from: 'avis', 
                     localField: '_id',
                     foreignField: 'mecanicien',
                     as: 'avis',
                 },
             },
             {
-                $unwind: '$avis',
+                $unwind: {
+                    path: '$avis',
+                    preserveNullAndEmptyArrays: true // Keep users even with no reviews
+                }
             },
+            
+            {
+                $group: {
+                    _id: {
+                        userId: "$_id",
+                        userName: "$name" // Assuming "nom" is the user name field
+                    },
+                    totalNote: { $sum: "$avis.note" }, // Sum total income for each service
+                    count: { $sum: 1 } // count the number of services
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    userId: "$_id.userId",
+                    userName: "$_id.userName",
+                    totalNote: 1,
+                    count: 1,
+                    
+                    adjustedCount: {
+                        $cond: {
+                            if: { $eq: ["$totalNote", 0] },
+                            then: 0,
+                            else: { $multiply: ["$count", 5] }
+                        },
+                    },
+                },
+            },
+            {
+                $sort: { userName: 1 } // Sort by username in ascending order
+            }
         ])
 
         res.json(mecanicien);
