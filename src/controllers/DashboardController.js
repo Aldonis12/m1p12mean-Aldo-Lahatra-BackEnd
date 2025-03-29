@@ -12,25 +12,33 @@ const totalIncome = async (req, res) => {
             const now = new Date();
             let startDate;
 
+            let endDate;
+            
             switch (req.query.period) {
-                case 'day':
+                case 'today':
                     startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    
                     break;
+                    
                 case 'week':
-                    const dayOfWeek = now.getDay();
-                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+                    const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
                     startDate = new Date(now.getFullYear(), now.getMonth(), diff);
+                    endDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 7);
                     break;
+                    
                 case 'month':
                     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                     break;
+                    
                 default:
-                    // No filter if period is invalid
+                    // No date filtering if period is invalid
                     break;
             }
 
             if (startDate) {
-                const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); // Inclusive end date.
                 matchStage.createdAt = { $gte: startDate, $lt: endDate };
             }
         }
@@ -72,26 +80,33 @@ const incomeService = async (req, res) => {
         if (req.query.period) {
             const now = new Date();
             let startDate;
-
+            let endDate;
+            
             switch (req.query.period) {
-                case 'day':
+                case 'today':
                     startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    
                     break;
+                    
                 case 'week':
-                    const dayOfWeek = now.getDay();
-                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+                    const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
                     startDate = new Date(now.getFullYear(), now.getMonth(), diff);
+                    endDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 7);
                     break;
+                    
                 case 'month':
                     startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
                     break;
+                    
                 default:
-                    // No filter if period is invalid
+                    // No date filtering if period is invalid
                     break;
             }
 
             if (startDate) {
-                const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1); // Inclusive end date.
                 matchStage.createdAt = { $gte: startDate, $lt: endDate };
             }
         }

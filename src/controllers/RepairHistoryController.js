@@ -5,6 +5,11 @@ const Vehicule = require("../models/Vehicule");
 const mongoose = require('mongoose');
 
 const getAllRepairHistory = async (req,res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    let total = await RepairHistory.countDocuments();
     try{
         let pipeline = [
             {
@@ -76,7 +81,10 @@ const getAllRepairHistory = async (req,res) => {
                     path: '$avis',
                     preserveNullAndEmptyArrays: true
                 }
-            }];
+            },
+            { $skip: startIndex },                // Skip the first 20 documents
+            { $limit: limit }                // Return maximum 10 documents
+        ];
 
         if(req.query.search){
             const searchTerm = req.query.search;
@@ -95,8 +103,15 @@ const getAllRepairHistory = async (req,res) => {
         }
 
         let repairHistory = await RepairHistory.aggregate(pipeline);
-        
-        res.json(repairHistory);
+        let sample = {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            data: repairHistory
+        }
+
+        res.json(sample);
     } catch(error){
         res.status(500).json({message: error.message});
     }
