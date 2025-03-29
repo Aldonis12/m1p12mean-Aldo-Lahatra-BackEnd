@@ -82,8 +82,8 @@ const getAllRepairHistory = async (req,res) => {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            { $skip: startIndex },                // Skip the first 20 documents
-            { $limit: limit }                // Return maximum 10 documents
+            { $skip: startIndex },                
+            { $limit: limit }                
         ];
 
         if(req.query.search){
@@ -137,6 +137,11 @@ async function PriceLoyalUser(clientId, prestationId) {
 //------------------------//
 
 const getRepairHistoryForMecanicien = async (req,res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    let total = await RepairHistory.countDocuments();
     try{
         const mecanicienId = new mongoose.Types.ObjectId(req.params.mecanicienId);
         let pipeline = [
@@ -214,7 +219,9 @@ const getRepairHistoryForMecanicien = async (req,res) => {
                 $match: {
                     'mecanicien._id': mecanicienId 
                 }
-            }
+            },
+            { $skip: startIndex },                
+            { $limit: limit }                
         ];
 
         if(req.query.search){
@@ -234,15 +241,26 @@ const getRepairHistoryForMecanicien = async (req,res) => {
         }
 
         let repairHistory = await RepairHistory.aggregate(pipeline);
+        let sample = {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            data: repairHistory
+        }
         
-        
-        res.json(repairHistory);
+        res.json(sample);
     } catch(error){
         res.status(500).json({message: error.message});
     }
 }
 
 const getRepairHistoryForClient = async (req,res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const startIndex = (page - 1) * limit;
+    let total = await RepairHistory.countDocuments();
     try{
         const clientId = new mongoose.Types.ObjectId(req.params.clientId);
         let pipeline = [
@@ -320,7 +338,9 @@ const getRepairHistoryForClient = async (req,res) => {
                 $match: {
                     'client._id': clientId 
                 }
-            }
+            },
+            { $skip: startIndex },                
+            { $limit: limit }
         ];
 
         if(req.query.search){
@@ -340,9 +360,15 @@ const getRepairHistoryForClient = async (req,res) => {
         }
 
         let repairHistory = await RepairHistory.aggregate(pipeline);
+        let sample = {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            data: repairHistory
+        }
         
-        
-        res.json(repairHistory);
+        res.json(sample);
     } catch(error){
         res.status(500).json({message: error.message});
     }
