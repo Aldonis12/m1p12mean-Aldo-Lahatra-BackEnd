@@ -427,8 +427,9 @@ const addHistory = async (req,res) => {
             prestation: prestation._id,
             mecanicien: mecanicien._id,
             client: client._id,
+            // price: await PriceLoyalUser(client._id, prestation._id)
             vehicule: vehicule._id,
-            numFacture: generateInvoiceNumber()
+            numFacture: generateInvoiceNumber(),
         });
         
         await history.save();

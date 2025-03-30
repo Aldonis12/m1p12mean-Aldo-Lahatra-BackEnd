@@ -2,6 +2,7 @@ const Prestation = require("../models/Prestation");
 const RendezVous = require("../models/RendezVous");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const { sendConfirmationEmail } = require("../config/email");
 
 const addRendezVous = async (req, res) => {
     try {
@@ -87,6 +88,24 @@ const cancelRendezVous = async (req, res) => {
     }
 };
 
+const validateRendezVous = async (req, res) => {
+    try {
+        const rdv = await RendezVous.findById(req.params.id).populate("prestation").populate("client");
+        if (!rdv) {
+            throw new Error('RendezVous not found');
+        }
+
+        rdv.type = true;
+        await rdv.save();
+
+        await sendConfirmationEmail(rdv);
+
+        res.status(200).json(rdv);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 const getAllRendezVous = async (req, res) => {
     try {
         const rdvs = await RendezVous.find().populate("prestation").populate("mecanicien").populate("client");
@@ -118,10 +137,27 @@ const getRendezVousUser = async (req, res) => {
     }
 };
 
+const deleteRdv = async (req, res) => {
+  try {
+    const Rdv = await RendezVous.findByIdAndDelete(req.params.id);
+    if (!Rdv) {
+      return res.status(404).json({ message: "rendez-vous non trouvé" });
+    }
+
+    res.status(200).json({ message: "rendez-vous supprimé avec succès" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la suppression du rendez-vous" });
+  }
+};
+
 module.exports = {
     addRendezVous,
     cancelRendezVous,
     getAllRendezVous,
     addMecanicienRdv,
-    getRendezVousUser
+    getRendezVousUser,
+    validateRendezVous,
+    deleteRdv
 }
