@@ -3,9 +3,6 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const RepairHistory = require("../models/RepairHistory");
 const RendezVous = require("../models/RendezVous");
-const User = require("../models/User");
-const RepairHistory = require("../models/RepairHistory");
-const Role = require("../models/Role");
 
 const totalIncome = async (req, res) => {
     try{
