@@ -24,7 +24,10 @@ mongoose.connect(process.env.MONGO_URI, {
     useUnifiedTopology: true
 }).then(() => console.log("MongoDB connecté"))
   .catch(err => console.error(err));
-  
+
+app.get("/", (req, res) => {
+  res.send("M1P12mean-Aldo-Lahatra-BackEnd")
+});
 app.use('/login', roleAuth);
 app.use('/roles', roleRoutes);
 app.use('/users', userRoutes);
@@ -37,5 +40,5 @@ app.use('/repair-histories', require('./src/routes/repairHistoryRoute'))
 app.use('/factures', require('./src/routes/factureRoute'))
 app.use('/dashboard', require('./src/routes/dashboardRoute'))
 
-const PORT = 5000;
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
