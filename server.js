@@ -32,5 +32,5 @@ app.use('/repair-histories', require('./src/routes/repairHistoryRoute'))
 app.use('/factures', require('./src/routes/factureRoute'))
 app.use('/dashboard', require('./src/routes/dashboardRoute'))
 
-const PORT = 5000;
+const PORT = 3000;
 app.listen(PORT, () => console.log(`Serveur sur http://localhost:${PORT}`));
