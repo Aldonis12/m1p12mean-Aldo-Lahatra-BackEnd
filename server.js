@@ -11,7 +11,12 @@ const rendezvousRoutes = require('./src/routes/rendezVousRoute');
 
 dotenv.config();
 const app = express();
-app.use(cors());
+
+const corsOptions = {
+  origin: 'http://your-frontend-domain.com' // Replace with your frontend's origin
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI, {
