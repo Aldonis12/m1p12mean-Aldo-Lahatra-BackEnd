@@ -19,7 +19,10 @@ mongoose.connect(process.env.MONGO_URI, {
     useUnifiedTopology: true
 }).then(() => console.log("MongoDB connecté"))
   .catch(err => console.error(err));
-  
+
+app.get("/", (req, res) => {
+  res.send("M1P12mean-Aldo-Lahatra-BackEnd")
+});
 app.use('/login', roleAuth);
 app.use('/roles', roleRoutes);
 app.use('/users', userRoutes);
