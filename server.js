@@ -13,7 +13,8 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: 'https://m1p12mean-aldo-lahatra-front-end.vercel.app' // Replace with your frontend's origin
+  // origin: 'https://m1p12mean-aldo-lahatra-front-end.vercel.app' // Replace with your frontend's origin
+  origin: 'http://localhost:4200'
 };
 
 app.use(cors(corsOptions));
