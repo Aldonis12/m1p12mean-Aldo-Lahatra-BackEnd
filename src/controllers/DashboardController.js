@@ -45,22 +45,11 @@ const totalIncome = async (req, res) => {
         }
 
         const repairHistory = await RepairHistory.aggregate([
-            {
-                $lookup: {
-                    from: 'prestations', // Assuming your User collection is named 'users'
-                    localField: 'prestation',
-                    foreignField: '_id',
-                    as: 'prestation',
-                },
-            },
-            {
-                $unwind: '$prestation',
-            },
-            { $match: matchStage },
+            
             {
                 $group: {
                     _id: null,
-                    totalIncome: { $sum: "$prestation.price" } // Replace "totalPrice" with the actual field
+                    totalIncome: { $sum: "$price" } // Replace "totalPrice" with the actual field
                 }
             }
             // Add other aggregation stages as needed (e.g., grouping, summing)
@@ -128,7 +117,7 @@ const incomeService = async (req, res) => {
             {
                 $group: {
                     _id: "$prestation.name", // Group by service name
-                    totalIncome: { $sum: "$prestation.price" }, // Sum total income for each service
+                    totalIncome: { $sum: "$price" }, // Sum total income for each service
                     count: { $sum: 1 } // count the number of services
                 }
             }
@@ -168,7 +157,7 @@ const totalIncomeByMonthThisYear = async (req, res) => {
             {
                 $group: {
                     _id: { $month: "$createdAt" }, // Group by month
-                    totalIncome: { $sum: "$prestation.price" }
+                    totalIncome: { $sum: "$price" }
                 }
             },
             {

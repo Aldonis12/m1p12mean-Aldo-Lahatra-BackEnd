@@ -423,11 +423,16 @@ const addHistory = async (req,res) => {
             throw new Error('Vehicule not found');
         }
 
+        //loyal user price
+        const repairHistoryCount = await RepairHistory.countDocuments({ client: data.clientId });
+        
+        const price = repairHistoryCount > 4 ? Number(prestation.price) * 0.9 : prestation.price; //10% amle prix prestation
+
         const history = new RepairHistory({
             prestation: prestation._id,
             mecanicien: mecanicien._id,
             client: client._id,
-            // price: await PriceLoyalUser(client._id, prestation._id)
+            price: price,
             vehicule: vehicule._id,
             numFacture: generateInvoiceNumber(),
         });
